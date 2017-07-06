@@ -1,0 +1,595 @@
+\documentclass{semdoc}
+\usepackage{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{color}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstdefinestyle{mystyle}{
+   backgroundcolor=\color{backcolour},  
+   commentstyle=\color{codegreen},
+   keywordstyle=\color{magenta},
+   numberstyle=\tiny\color{codegray},
+   stringstyle=\color{codepurple},
+   basicstyle=\footnotesize,
+   breakatwhitespace=false,        
+   breaklines=true,                
+   captionpos=b,                   
+   keepspaces=true,                                
+   showspaces=false,               
+   showstringspaces=false,
+   showtabs=false,                 
+   tabsize=2
+}
+\lstset{style=mystyle}
+% Template: $Id: t01_txt.tex,v 1.7 2000/05/23 12:13:37 bless Exp $
+% -----------------------------------------------------------------------------
+%epstopdf ermöglicht, dass eps-Dateien durch pdflatex in windows eingebunden werden können
+%\usepackage{epstopdf}
+% Report Praktikum
+% -----------------------------------------------------------------------------
+% Kommentare beginnen mit einem %-Zeichen
+\docbegin
+% --> Oberhalb der Linie bitte nichts ändern.
+% ---------------------------------------------------------------------------
+% \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
+% Stellen, an denen etwas geaendert werden soll, sind wie hier gekennzeichnet.
+% /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\
+
+%
+% ---------------------------------------------------------------------------
+% \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
+% --> Bitte den Titel des Beitrages in die nächste Zeile eintragen:
+\title{Praktikumsbericht 3}
+%
+% --> ... und den Namen des Autors:
+\author{Jean-Marc Hendrikse - 1751591}
+% /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\
+% -----------------------------------------------------------------------------
+
+% Nicht ändern!
+\event{Access Control Systems Lab\\}
+\term{Sommersemester 2017}
+\supervisor{Prof. Dr. Hannes Hartenstein, Alexander Degitz, Jan Grashöfer, Till Neudecker}
+
+%
+%
+\maketitle
+% ---------------------------------------------------------------------------
+% \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
+% Einleitung
+% /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\
+\section*{Einleitung} % in die Klammern die Ueberschrift 
+\label{Introduction} % und ein Label
+In dieser Übung wird anhand eines Datenmodels auf JSON-Basis für eine RBAC- und ReBAC-Instanz ein sogenannter Policy Decision Point umgesetzt, der anhand von Policies (deutsch Regeln) Entscheidungen treffen soll. Dadurch kann ein Zugriffsystem erstellt werden, das Ressourcen vor unerlaubten Zugriffen schützt und nur Benutzern die Erlaubnis erteilt, die eine entsprechende Rolle innehaben. 
+
+
+% ---------------------------------------------------------------------------
+% \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
+% RBAC
+% /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\
+\section{RBAC}
+\label{rbac}
+Das Role Based Access Control (Kurzform RBAC) ist ein Verfahren zur Zugriffskontrolle und -steuerung. Besonders in Domänen mit vielen Benutzern, die verschiedene Berechtigungen auf Ressourcen ausführen können, wird dieser Ansatz größtenteils verwendet, um die Komplexität durch die Zuweisung von Benutzern zu Rollen und Rollen zu Berechtigungen (engl. permission) zu verringern.
+
+\subsection{Umsetzung}
+\label{umsetzung}
+Nachfolgend wird beschrieben wie man eine RBAC-Insatz umsetzen kann. Als grundlegendes Datenmodel steht uns die Datei \texttt{rbac.json} zur Verfügung. Die Datei beinhaltet die folgenden fünf Elemente:
+\begin{itemize}
+\item "'users"': Eine Liste aller Benutzer, die in dem System vorhanden sind.
+\item "'roles"': Liste aller Rollen in dem System.
+\item "'roleassignment"': Jedem Benutzer ist eine Liste von Rollen zugeordnet, die dem Benutzer zugewiesen sind.
+\item "'rolehierarchy"': Rollen können die Rechte von untergeordneten Rollen erhalten und somit auf gleicher Rollenbasis agieren.
+\item "'permissionassignment"':  Hier sind die Rollen definiert, die auf eine bestimmte Ressource mit dem Feld \texttt{name}, zugreifen können.
+\end{itemize}
+
+Die Zugriffsentscheidungen werden durch Funktionen eines Python-Skripts auf Basis dieser  Datenstruktur getroffen. Über die Kommandozeile werden die 
+Eingabewerte \texttt{user} und \texttt{resource} eingelesen, die zur Zugriffsentscheidung benötigt werden: python rbac.py Alice Angola. 
+
+\begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=Python, caption={Auszug aus dem Python-Skript: Initialisierung von user und resource}, captionpos=b, label=rbac_cmd]
+#!/usr/bin/python
+import sys
+ # Commandline inputs
+    name = sys.argv[1] # Argument for name of person accessing the resource
+    resource = sys.argv[2] # Name of the resource a person tries to access
+\end{lstlisting}
+
+In Listing \ref{rbac_cmd} wird der Name und die Ressource mit der entsprechenden Benutzereingabe initialisiert. 
+Die JSON-Datei wandeln wir, wie in Listing \ref{jsonload}, mittels \texttt{json.loads()} in ein JSON-Objekt um, sodass wir auf den Daten in Python operieren können.
+
+\begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=Python, caption={Über json.load() wird der Inhalt der JSON-Datei eingelesen und in ein JSON-Objekt umgewandelt}, captionpos=b, label=jsonload]
+if len(sys.argv) == 3:
+   # Commandline inputs
+    name = sys.argv[1] # Argument for name of person accessing the resource
+    resource = sys.argv[2] # Name of the resource a person tries to access
+
+    pa_list = ''
+    jdata = json.loads(open('data/rbac.json').read()) # Reads the content of the given json file
+\end{lstlisting}
+
+Als nächstes wäre es gut zu wissen, ob die eingegeben Daten valide sind und ob diese überhaupt in unserem Datensatz existieren. Somit können bereits früh Entscheidungen getroffen werden ohne intensive Berechnungen vorzunehmen. Gleichzeitig initialisieren wir die Liste mit der Rechtevergabe, in der alle Rollen festgehalten sind, die auf die Ressource zugreifen dürfen.
+
+\begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=Python, caption={Benutzereingabe überprüfen und Liste mit den Rollen laden.}, captionpos=b, label=lsfileattr]
+    if name in jdata['users']:
+        # gets the permission list by resource name
+        for permission in jdata['permissionassignment']:
+            if permission['name'] == resource:
+                pa_list = permission['pa']
+                break # breaks the loop if pa was found
+        if pa_list == '':
+            print False
+\end{lstlisting}
+
+Wie bereits beschrieben, werden den Benutzern Rollen zugewiesen. Aus diesem Grund muss mindestens eine der Rollen des Benutzers mit mindestens einer zugewiesenen Rolle für den Zugriff auf die Ressource übereinstimmen. In Listing \ref{rbac_roles} wird dies durch einen einfachen Vergleich in Zeile 5 umgesetzt. Ist eine der Rollen des Benutzers in der Liste enthalten wird abgebrochen und der boolsche Wert "'True"' zurückgeliefert. Ist dies nicht der Fall besteht noch die Möglichkeit, dass über die Rollenhierarchie eine Rolle des Benutzers eine übergeordnete Rolle von einer der Ressource zugewiesenen Rolle ist. Somit hätte die Rolle des Benutzers alle Rechte, die auch die untergeordnete Rolle besitzt. Eine möglichst effiziente Umsetzung erfolgt durch eine Breitensuche entlang des hierarchischen Baumes. Die Implementierung der Breitensuche ist rekursive und dem Algorithmus \texttt{Breadth-First-Search} nachempfunden \cite{bfs}.
+
+\begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=Python, caption={Überprüfung der Rollen zur Zugriffsentscheidung}, captionpos=b, label=rbac_roles]
+roleassignment = jdata['roleassignment'][name]
+        hasPerm = False
+
+        for role in roleassignment:
+            if role in pa_list:
+                hasPerm = True
+                break
+            else:
+                for pa_role in pa_list:
+                    if is_child(jdata['rolehierarchy'], role, pa_role):
+                        hasPerm = True
+                        break
+\end{lstlisting}
+
+Zum Abschluss wird abhängig von den obigen entscheidungen entweder \texttt{True} oder \texttt{False} ausgegeben:
+\begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=Python, caption={Ausgabe True, wenn Zugriff gewährt wird. Andernfalls False.}, captionpos=b]
+		print hasPerm
+    else:
+        print False 
+\end{lstlisting}
+
+
+% ---------------------------------------------------------------------------
+% \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
+% ReBAC
+% /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\
+\section{ReBAC}
+\label{rebac}
+Benutzer in Social Networks sind über Beziehungen miteinander Verknüpft. Beispielsweise können durch eine Einstellung bei Facebook nur die eigenen Freunde sehen, was ein Benutzer gepostet oder hochgeladen hat. Der Besitzer einer Ressource kann somit anhand von Beziehungen zu demjenigen bestimmen, der auf die Ressource zugreifen möchte. So einen Ansatz nennt man Relation-Based Access Control (kurz ReBAC). Im Nachfolgenden möchten wir eine solche Insatz wieder anhand eines gegebenen Datenmodels erstellen.
+
+\subsection{ReBAC Implementierung} 
+\label{rebac_impl}
+Ähnlich wie in Kapitel \ref{umsetzung} bietet eine JSON-Datei die Grundlage für unsere Zugriffsentscheidungen. Das JSON-File beinhaltet die nachfolgenden vier Elemente:
+\begin{itemize}
+\item "'user"': Liste aller Benutzer des Systems.
+\item "'usergraph"': Freundesliste für jeden Benutzer.
+\item "'policies"': Für jeden Benutzer TRP- und TUP-Regel
+\item "'resources"': Für jede einzelne Ressource angabe von Name, den Besitzer der Ressource und alle Zielnutzer.
+\end{itemize}
+Auch hier müssen für den Zugriff verschiedene Regeln ausgewertet werden.  Zum einen wird die TRP-Regel des besitzenden Nutzers einer Ressource und zum anderen die TUP-Regeln der Zielnutzer betrachtet. Diese Regeln besitzen eine Angabe wie lang der kürzeste Pfad zwischen zwei Benutzern sein darf, um auf eine Ressource zuzugreifen. \\
+Im Grunde werden auch in ReBAC Benutzername und die Ressource als Eingabeparameter erwartet. Zusätzlich wird noch eine Angabe gemacht, ob die Regel des zugreifenden Benutzers mit allen Regeln/Policies aller Benutzer einer Ressource (Umsetzung durch das Schlüsselwort \texttt{ALL}) oder nur mit mindestens einer Regel übereinstimmen muss. Listing \ref{rebac_init} zeigt einen Auschnitt, der dies umsetzt:
+\begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=Python, caption={Auschnitt der ReBAC-Zugriffsentscheidung}, captionpos=b, label=rebac_init]
+ user = sys.argv[1]
+    resource_name = sys.argv[2]
+    conflict_res = sys.argv[3]
+
+    jdata = json.loads(open('data/rebac.json').read())
+    graph = jdata['usergraph']
+    policies = jdata['policies']
+    resource = jdata['resources']
+
+    if user not in jdata['users']:
+        print False
+    else:
+        switcher = {
+            "ALL": all_conj(user, resource),
+            "ANY": any_conj(user, resource)
+        }
+        print switcher.get(conflict_res, False)
+else:
+    print "Please pass 3 arguments. E.g. Alice Angola ALL."
+    print "-> False"
+\end{lstlisting}
+
+Wie in Listing \ref{rebac_init} zu erkennen ist, wird die Funktion \texttt{all\_conj()} ausgeführt, wenn der Benutzer das Schlüsselwort \texttt{ALL} eingibt. In dieser Funktion wird verglichen ob die Distanz des Benutzers zu dem "'controller"' über den \texttt{usergraph} in der TRP-Regel liegt und ob zusätzlich die Distanz des Benutzers zu allen "'target"'-Benutzern in den jeweiligen TUP-Regeln liegt. Ist dies der Fall wird der boolsche Wert \texttt{True} ausgegeben. Auch hier wird wieder auf den Breadth-First-Search-Algorithmus zurückgegriffen. Dieses Mal wird allerdings die Distanz zwischen zwei Benutzern in einem Benutzergraphen berechnet. 
+
+\begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=Python, caption={Umsetzung der ALL-Variante, welche eine Konjunktion aller Regeln umsetzt.}, captionpos=b, label=rebac_init]
+def all_conj(userName, resource_list):
+    res = {}
+    for res_elem in resource_list:
+        if res_elem['name'] == resource_name:
+            res = res_elem
+            break
+	# Get controller
+    controller = res['controller']
+    # calculate the distance between the accessing user and the controller
+    distance = len(bfs(graph, userName, controller)) - 1
+    policy = policies[controller]["trp"]
+
+	# Interprete TRP-Policy and return True or False
+    if not access_decision(distance, policy):
+        return access_decision(distance, policy)
+
+	# For every target user calculate distance between user and target user with bfs
+    for target_user in res['target']:
+        distance = len(bfs(graph, userName, target_user)) - 1
+        policy = policies[target_user]["tup"]
+        if not access_decision(distance, policy):
+            return access_decision(distance, policy)
+
+    return True
+\end{lstlisting}
+In Listing \ref{rebac_helper} werden die beiden Helfer-Funktionen zur Interpretation der Distanzen durch "'<"', "'>"' und "'="' und zur Berechnung der Distanz dank des BFS-Algorithmus aufgeführt:
+\begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=Python, caption={Hilffunktionen zur Interpretation und BFS}, captionpos=b, label=rebac_helper]
+def access_decision(distance, policy, ):
+    policy_dis = int(policy[2])
+    interprete = {
+        ">": distance > policy_dis,
+        "<": distance < policy_dis,
+        "=": distance == policy_dis
+    }
+    return interprete.get(policy[1], False)
+
+
+def bfs(graph, start, end):
+    # maintain a queue of paths
+    queue = []
+    # push the first path into the queue
+    queue.append([start])
+    while queue:
+        # get the first path from the queue
+        path = queue.pop(0)
+        # get the last node from the path
+        node = path[-1]
+        # path found
+        if node == end:
+            return path
+        # enumerate all adjacent nodes, construct a new path and push it into the queue
+        for adjacent in graph.get(node, []):
+            new_path = list(path)
+            new_path.append(adjacent)
+            queue.append(new_path)
+\end{lstlisting}
+Neben der Variante, in der alle Policies mit der Distanz verglichen werden, gibt es noch die Umsetzung mit dem Schlüsselwort \texttt{ANY}, wodurch entweder nur die Distanz des Benutzers zum Kontroller mit der TRP-Regel oder die Distanz des Benutzers zu einem der target-Benutzern mit dessen TUP-Regel übereinstimmen muss: 
+\begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=Python, caption={Umsetzung der ANY-Variante umsetzt.}, captionpos=b]
+def any_conj(userName, resource_list):
+    res = {}
+    for res_elem in resource_list:
+        if res_elem['name'] == resource_name:
+            res = res_elem
+            break
+
+    controller = res['controller']
+    distance = len(bfs(graph, userName, controller)) - 1
+    policy = policies[controller]["trp"]
+
+    if access_decision(distance, policy):
+        return access_decision(distance, policy)
+
+    for target_user in res['target']:
+        distance = len(bfs(graph, userName, target_user)) - 1
+        policy = policies[target_user]["tup"]
+        if access_decision(distance, policy):
+            return access_decision(distance, policy)
+
+    return False
+\end{lstlisting}
+
+% ---------------------------------------------------------------------------
+% \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
+% ReBAC
+% /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\
+\subsection{Erweiterung der ReBAC-Insatz}
+\label{}
+Zur Erweiterung der ReBAC-Instanz aus vorherigem Abschnitt bietet es sich an weitere Beziehungstypen zwischen den Benutzern miteinzuführen. So wäre denkbar neben \texttt{friends} auch \texttt{family} oder \texttt{coworker} mitaufzunehmen. Dafür müsste man wie in Listing \ref{usergraph} den Usergraph erweitern.
+\begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=Python, caption={Anpassung des usergraphen um weitere Beziehungstypen}, captionpos=b, label=usergraph]
+ "usergraph": {
+    "Willy": {
+    		"friends": [
+      			"Melina", 
+      			"Juliana", 
+      			"Madella", 
+      			"Jerrilee", 
+      			"Binni", 
+      			"Amalita", 
+      			"Alicea"
+      		],
+      		"coworker": [
+      			"Peter", 
+      			"Stephanie", 
+      			"Melina"
+      		],
+      		"family": [
+				"Susanne",
+				"Diana",
+				"Thomas"      		
+      		]
+    }, ...}
+\end{lstlisting}
+Weiterhin müssten auch nun die \texttt{policies} angepasst werden, indem die Distanzen zu \texttt{coworker} und \texttt{family} in den TUPs und TRPs angegeben werden, wodurch letztlich die Policy Language angepasst wird. Letztlich wird, wie im vorherigen Abschnitt, die Distanz zwischen Benutzer, der auf die Ressource zugreifen möchte, und dem controller und target usern anhand von \texttt{friends}, \texttt{coworker} und \texttt{family} berechnet und mit den Policies verglichen
+\subsection{Umwandlung einer nicht-hierarchischen RBAC-Instanz in eine ReBAC-Instanz}
+\label{rbacToRebac}
+Ein Ansatz bei der Umwandlung einer RBAC-Instanz in eine ReBAC-Instanz wäre die Rollen aus dem RBAC in \texttt{user} des ReBAC umzuwandeln. Den Usergraph könnte man beispielsweise so anpassen, dass alle \texttt{user}, die eine bestimmte Rolle im RBAC besitzen als Liste der entsprechenden transformierten Rollen den Usern zugeordnet werden.
+
+\begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=bash, caption={Roleassignment in RBAC.}, captionpos=b, label=rbac_roleass]
+{ ...
+"roleassignment": {
+"Janeva": [
+      "information", 
+      "product", 
+      "creative"
+    ], 
+    "Marcia": [
+      "product",  
+      "data",  
+ 	  "communications"
+    ], 
+    "Anni": [
+      "communications",
+      "creative"
+    ]
+ }
+ ...}
+\end{lstlisting}
+
+Eine Transformierung von Listing \ref{rbac_roleass} in ein entsprechendes ReBAC-Modell ist im nachfolgenden Listing \ref{rebac_usergraph}
+
+ \begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=bash, caption={Modifizierter Usergraph durch Umwandlung der roleassignments aus RBAC}, captionpos=b, label=rebac_usergraph]
+ {
+  "usergraph": {
+    "information": [
+     "Janeva"
+    ], 
+    "product": [
+      "Janeva", 
+      "Marcia"
+    ], 
+     "creative": [
+      "Janeva", 
+      "Anni"
+    ], 
+      "communications": [
+      "Anni", 
+      "Marcia"
+    ], 
+      "data": [
+      "Marcia"
+    ]}...}
+\end{lstlisting}  
+
+
+Auch das \texttt{permissionassignment} Listing \ref{perass} kann im äquivalenten \texttt{resources}-Feld aus dem ReBAC-Datensatz umgewandelt werden Listing \ref{res_rebac}, indem die target user Rollen werden. 
+\begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=bash, caption={Permission assignment in RBAC}, captionpos=b, label=perass]
+{
+  "permissionassignment": [
+    {
+      "pa": [
+        "creative", 
+        "product" 
+      ], 
+      "name": "Afghanistan"
+    }, 
+\end{lstlisting}
+\begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=bash, caption={Äquivalent zum RBACs permissionassignment das modifizierte "resources"-Feld}, captionpos=b, label=res_rebac]
+"resources": [
+    {
+      "name": "Afghanistan", 
+      "target": [
+        "product", 
+        "creative"
+      ]
+    }, ...
+    }
+\end{lstlisting}
+Abschließend müssen natürlich noch Policies so angepasst werden, dass sie auch nur den Benutzern Zugriff erteilen, die mit den entsprechenden Rollen (bzw. in ReBAC neue Benutzer) direkt verbunden sind:
+ \begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=bash, caption={Modifizierte Policies}, captionpos=b, label=rebac_pol]
+ policies": {
+    "product": {
+      "tup": "h=1"
+    }, 
+    
+    "creative": {
+      "tup": "h=1"
+    }, 
+    "communications": {
+      "tup": "h=1"
+    }, 
+    "information": {
+      "tup": "h=1"
+    }, 
+    \end{lstlisting}
+    
+\section*{Anhang}
+\label{anhang}
+Nachfolgend die kompletten Programme.
+\begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=Python, caption={rbac.py}, captionpos=b, label=rbacpy]
+#!/usr/bin/python
+import sys
+import json
+
+# finds shortest path between 2 nodes of a graph using BFS
+def is_child(graph, start, goal):
+    # keep track of explored nodes
+    explored = []
+    # keep track of all the paths to be checked
+    queue = [[start]]
+
+    # return path if start is goal
+    if start == goal:
+        return True
+
+    # keeps looping until all possible paths have been checked
+    while queue:
+        # pop the first path from the queue
+        path = queue.pop(0)
+        # get the last node from the path
+        node = path[-1]
+        if node not in explored:
+            neighbours = graph[node]
+            # go through all neighbour nodes, construct a new path and
+            # push it into the queue
+            for neighbour in neighbours:
+                new_path = list(path)
+                new_path.append(neighbour)
+                queue.append(new_path)
+                # return path if neighbour is goal
+                if neighbour == goal:
+                    return True
+
+            # mark node as explored
+            explored.append(node)
+
+    # in case there's no path between the 2 nodes
+    return False
+
+
+if len(sys.argv) == 3:
+    # Commandline inputs
+    name = sys.argv[1] # Argument for name of person accessing the resource
+    resource = sys.argv[2] # Name of the resource a person tries to access
+
+    pa_list = ''
+    jdata = json.loads(open('data/rbac.json').read()) # Reads the content of the given json file
+
+    if name in jdata['users']:
+        # gets the permission list by resource name
+        for permission in jdata['permissionassignment']:
+            if permission['name'] == resource:
+                pa_list = permission['pa']
+                break # breaks the loop if pa was found
+        if pa_list == '':
+            print False
+
+        roleassignment = jdata['roleassignment'][name]
+        hasPerm = False
+
+        for role in roleassignment:
+            if role in pa_list:
+                hasPerm = True
+                break
+            else:
+                for pa_role in pa_list:
+                    if is_child(jdata['rolehierarchy'], role, pa_role):
+                        hasPerm = True
+                        break
+
+        print hasPerm
+    else:
+        print False
+else:
+    print "Please pass 2 arguments"
+\end{lstlisting}
+
+\begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=Python, caption={rebac.py}, captionpos=b, label=rebacpy]
+#!/usr/bin/python
+import sys
+import json
+
+
+def all_conj(userName, resource_list):
+    res = {}
+    for res_elem in resource_list:
+        if res_elem['name'] == resource_name:
+            res = res_elem
+            break
+
+    controller = res['controller']
+    distance = len(bfs(graph, userName, controller)) - 1
+    policy = policies[controller]["trp"]
+
+    if not access_decision(distance, policy):
+        return access_decision(distance, policy)
+
+    for target_user in res['target']:
+        distance = len(bfs(graph, userName, target_user)) - 1
+        policy = policies[target_user]["tup"]
+        if not access_decision(distance, policy):
+            return access_decision(distance, policy)
+
+    return True
+
+
+def any_conj(userName, resource_list):
+    res = {}
+    for res_elem in resource_list:
+        if res_elem['name'] == resource_name:
+            res = res_elem
+            break
+
+    controller = res['controller']
+    distance = len(bfs(graph, userName, controller)) - 1
+    policy = policies[controller]["trp"]
+
+    if access_decision(distance, policy):
+        return access_decision(distance, policy)
+
+    for target_user in res['target']:
+        distance = len(bfs(graph, userName, target_user)) - 1
+        policy = policies[target_user]["tup"]
+        if access_decision(distance, policy):
+            return access_decision(distance, policy)
+
+    return False
+
+
+def access_decision(distance, policy, ):
+    policy_dis = int(policy[2])
+    interprete = {
+        ">": distance > policy_dis,
+        "<": distance < policy_dis,
+        "=": distance == policy_dis
+    }
+    return interprete.get(policy[1], False)
+
+
+def bfs(graph, start, end):
+    # maintain a queue of paths
+    queue = []
+    # push the first path into the queue
+    queue.append([start])
+    while queue:
+        # get the first path from the queue
+        path = queue.pop(0)
+        # get the last node from the path
+        node = path[-1]
+        # path found
+        if node == end:
+            return path
+        # enumerate all adjacent nodes, construct a new path and push it into the queue
+        for adjacent in graph.get(node, []):
+            new_path = list(path)
+            new_path.append(adjacent)
+            queue.append(new_path)
+
+
+if len(sys.argv) == 4:
+    user = sys.argv[1]
+    resource_name = sys.argv[2]
+    conflict_res = sys.argv[3]
+
+    jdata = json.loads(open('data/rebac.json').read())
+    graph = jdata['usergraph']
+    policies = jdata['policies']
+    resource = jdata['resources']
+
+    if user not in jdata['users']:
+        print False
+    else:
+        switcher = {
+            "ALL": all_conj(user, resource),
+            "ANY": any_conj(user, resource)
+        }
+        print switcher.get(conflict_res, False)
+else:
+    print "Please pass 3 arguments. E.g. Alice Angola ALL."
+    print "-> False"
+
+\end{lstlisting}
+
+
+\begin{thebibliography}{9}
+
+\bibitem{bfs}
+  \urltext{https://pythoninwonderland.wordpress.com/2017/03/18/how-to-implement-breadth-first-search-in-python/}
+
+\end{thebibliography}
+\docend
+%%% end of document

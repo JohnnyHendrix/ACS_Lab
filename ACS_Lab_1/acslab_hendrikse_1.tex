@@ -1,0 +1,361 @@
+\documentclass{semdoc}
+\usepackage{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{color}
+\bibliographystyle{alphadin}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstdefinestyle{mystyle}{
+   backgroundcolor=\color{backcolour},
+   commentstyle=\color{codegreen},
+   keywordstyle=\color{magenta},
+   numberstyle=\tiny\color{codegray},
+   stringstyle=\color{codepurple},
+   basicstyle=\footnotesize,
+   breakatwhitespace=false,
+   breaklines=true,
+   captionpos=b,
+   keepspaces=true,
+   showspaces=false,
+   showstringspaces=false,
+   showtabs=false,
+   tabsize=2
+}
+\lstset{style=mystyle}
+% Template: $Id: t01_txt.tex,v 1.7 2000/05/23 12:13:37 bless Exp $
+% -----------------------------------------------------------------------------
+%epstopdf ermöglicht, dass eps-Dateien durch pdflatex in windows eingebunden werden können
+%\usepackage{epstopdf}
+% Report Praktikum
+% -----------------------------------------------------------------------------
+% Kommentare beginnen mit einem %-Zeichen
+\docbegin
+% --> Oberhalb der Linie bitte nichts ändern.
+% ---------------------------------------------------------------------------
+% \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
+% Stellen, an denen etwas geaendert werden soll, sind wie hier gekennzeichnet.
+% /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\
+
+%
+% ---------------------------------------------------------------------------
+% \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
+% --> Bitte den Titel des Beitrages in die nächste Zeile eintragen:
+\title{Praktikumsbericht 1}
+%
+% --> ... und den Namen des Autors:
+\author{Jean-Marc Hendrikse - 1751591}
+% /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\
+% -----------------------------------------------------------------------------
+
+% Nicht ändern!
+\event{Access Control Systems Lab\\}
+\term{Sommersemester 2017}
+\supervisor{Prof. Dr. Hannes Hartenstein, Alexander Degitz, Jan Grashöfer, Till Neudecker}
+
+%
+%
+\maketitle
+
+\section*{Introduction} % in die Klammern die Ueberschrift
+\label{Introduction} % und ein Label
+This is the solution sheet for the first Access Control Systems Lab exercise sheet. The main intention of this exercise is to get in touch with the Reference Monitor and Security-Enhanced Linux (SELinux) one of the oldest and most popular Linux Security Module (LSM) to implement Reference Monitors for the Linux operating system.
+
+In the first section we will discuss the background and history of \hyperref[selinux]{SELinux}. In the second section we will explain the basic concepts of SELinux. The third section will describe how you could use SELinux concepts practically and the last section discusses how to implement a Reference Monitor.
+
+\section{History and Background}
+\label{History}
+In this section we will give you a brief background and history of \hyperref[selinux]{SELinux}. SELinux was originally a development project from the National Security Agency (NSA) which was implemented as a Flask operating system security architecture. The Flask architecture implements Mandatory Access Control (MAC) and focuses on the concept of least privilege. [Sm02]
+
+\subsection{License}
+In December 2000 SELinux was released by the NSA as a general access software product with the source code distributed under a GPL license. Since then it is still under the GNU GPL license available.\cite{wikisel}
+
+\subsection{Who are the SELinux contributors?}
+The key concept underlying the SELinux based on several earlier projects by NSA who is also the main contributor. Other significant contributors include \textit{Red Hat}, \textit{Network Associates}, \textit{Secure Computing Corporation}, \textit{Tresys Technology}, and \textit{Trusted Computer Solutions}.\cite{wikisel}
+
+\subsection{Who is in charge of SELinux?}
+As we mentioned earlier SELinux was originally developed by the NSA and Red Hat, but today Red Hat is mainly in charge of SELinux.\cite{wikisel}
+
+\section{Basic Concepts of SELinux}
+In the following we will discuss the basic concepts of SELinux and especially introduce concepts of \textit{Policy}, \textit{Labels} and \textit{Modes}.
+
+
+\subsection{SELinux Policy}
+SELinux follows the model of least-privilege that means that by default everything is denied and only policies give each element of the system access required to its function. SELinux allows different policies to be written that are interchangeable. \cite{CeSEL}
+SELinux policy is a set of rules that guide the SELinux security engine by defining some types for file objects and domains for processes. Types and domains are equivalent with the difference that types are used to apply to objects while domains apply to processes. In order to limit entering the domain SElinux policy uses \textit{roles} and these roles are specified by user identities which can be attained to the roles. The default policy in Fedora is the so called \textit{target} policy which targets and restricts selected system processes. \cite{FeSELPo}
+
+\subsection{SELinux Labels}
+\label{sec:labels}
+
+As in \cite{WiGeSEL} described SELinux labels are mostly stored as extended attributes. But you have to be careful this is not standard, because some file systems do not support extended attributes. In these cases, all files on the file system get assigned the same context, usually provided through the mount option of the file system. On systems running SELinux, all processes and files are labelled in a way that represents security-relevant information which is called the SELinux \textit{context}. E.g. by running the command \texttt{ls -Z} the information of a certain file will be printed.
+
+\subsection{SELinux Modes}
+SELinux provides three basic modes of operation:
+\begin{itemize}
+   \item \textbf{Enforcing} - is the installation default mode which enforces the SELinux security policy on the system, denying access and logging actions.\cite{FeDocSEL-SM}
+   \item \textbf{Permissive} - this mode enables SELinux but will not enforce the security policy, only warn and log actions. This mode is also very helpful for troubleshooting SELinux issues.\cite{FeDocSEL-SM}
+   \item \textbf{Disabled} - in this mode SELinux is turned off.\cite{FeDocSEL-SM}
+\end{itemize}
+
+
+The SELinux Management UI enables to view the SELinux mode and make changes possible. From the command line the GUI is available by running \texttt{system-config-selinux}.
+
+\section{Using SELinux}
+After we finished the theoretical part of the basic concepts of SELinux we would like to have a more practical view on SELinux.
+\subsection{Using \texttt{sestatus}}
+First of all we would like to check the \textit{status} of SELinux. This can be done by printing the status of SELinux on the running system using \texttt{sestatus}:
+\begin{lstlisting}[language=bash, caption={sestatus ouput}, captionpos=b, label=lsfileattr]
+SELinux status:									enabled
+SELinuxfs mount: 								/sys/fs/selinux
+SELinux root directory: 				/etc/selinux
+Loaded policy name: 						targeted
+Current mode: 									enforcing
+Mode from config file: 					enforcing
+Policy MLS status:							enabled
+Policy deniy_unknown status: 		allowed
+Max kernel policy version: 			30
+\end{lstlisting}
+
+As in \cite{FeDocSEL-EDS} described the command displays data whether SELinux is enabled, disabled, the loaded policy and whether it is in enforcing or permissive mode (we will describe in later section what that means). It can also be used to display the security context of files and processes listed in the /etc/sestatus.conf file. In this case SELinux is \textbf{enabled}, SELinux is mounted at
+\texttt{/sys/fs/selinux}, the root directory of SELinux is \texttt{/etc/selinux}, the default policy name is \texttt{targeted} and the current mode is \texttt{enforcing} the same as from config file, Multi Level Security protection is enabled, the state for unknown permissions is allowed which means everything is allowed to perform this action and the system support a maximum version of 30 that will also support loading policy modules of a lower binary version.
+
+\subsection{Starting the Webserver}
+In the next step we start the webserver by using the command \texttt{sudo systemctl start httpd}. If you are not sure whether the webserver is running or not you can simply check it by \texttt{systemctl status httpd}.
+After the webserver started we would like to see what the server actually serves when calling the index.html file: \texttt{curl http://localhost/index.html}. In our case this command prints out:
+\begin{lstlisting}[language=bash, caption={SELinux index.html output}, captionpos=b, label=lsfileattr]
+"Security = Access Control"
+\end{lstlisting}
+Which is basically the content of \texttt{index.html}.
+
+As mentioned in the section about \hyperref[sec:labels]{labels} we get attributes and detail information from a file by running \texttt{ls -lZ}:
+\begin{lstlisting}[language=bash, caption={SELinux context of index.html}, captionpos=b, label=lsfileattr]
+total 4
+-rw-r--r--. 1 root root unconfined_u:object_r:httpd_sys_content_t:s0 26 May  3 15:32 /var/www/html/index.html
+\end{lstlisting}
+By executing the \texttt{ls -lZ} command we get the security context of the file /var/www/html/index.html. In addition to the standard file permissions and ownership, we can see the SELinux security context fields: unconfined\textunderscore u:object\textunderscore r:httpd\textunderscore sys\textunderscore content\textunderscore t:s0. The scheme is user:role:type:mls which means in that case that the user is unconfined logged in, the role is object and the type is \texttt{httpd\textunderscore sys\textunderscore content}. The MLS has a low security level (s0), associated with no compartments. \cite{CeSEL}
+
+In the next task we change the type label of the file to \texttt{samba\textunderscore share\textunderscore t} using \texttt{chcon}. After trying to retrieve the file again we get the following output:
+\begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=HTML, caption={index.html output access permission denied}, captionpos=b, label=lsfileattr]
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html>
+	<head>
+		<title>403 Forbidden</title>
+	</head>
+	<body>
+		<h1>Forbidden</h1>
+		<p>You don't have permission to access /index.html on this server.<br /> </p>
+	</body>
+</html>
+\end{lstlisting}
+
+This means we have no permission to access that file. But why did the permission changed and why do we have no permission rights? By using \texttt{chcon} users provide all or part of the SELinux context to change. An incorrect file type causes  access deny which is why we get the error message from above.
+
+\subsection{The \texttt{audit.log} File}
+After we performed some actions on our SELinux access decisions are logged by \textit{auditd} to /var/log/audit/audit.log. Locating the log message of the previous access decision gives us:
+
+\begin{lstlisting}[language=bash, caption={Access decision from audit.log file.}, captionpos=b, label=lsfileattr]
+type=AVC msg=audit(1494689834.117:338): avc:  denied  { getattr } for  pid=2980 comm="httpd" path="/var/www/html/index.html" dev="dm-0" ino=1180274 scontext=system_u:system_r:httpd_t:s0 tcontext=unconfined_u:object_r:samba_share_t:s0 tclass=file permissive=0
+\end{lstlisting}
+The following Table is inspired by \cite{WiGeSEL-PDD} and describes the parts of that message:
+
+   \begin{tabular}{ | l | p{9cm} |}
+   \hline
+   Log part                        & Description \\ \hline
+   type=AVC                        & This log part describes the audit log type.
+                                    In our example the log type is set to Access
+                                    Vector Cache (AVC) log entry. \\ \hline
+   msg=audit(1494689834.117:338)   & Is the timestamp in seconds since January 1st
+                                      1970.\\ \hline
+   avc:                            & Again we get a log type and again it shows
+                                      up a AVC log type. \\ \hline
+   denied                          & Describes the \textbf{state} of previous
+                                      denied or granted decisions by SELinux. \\ \hline
+   {{getattr}}                     & Is simply a permission request,
+                                      which is in this case a read operation getattr.\\ \hline
+   for pid=2980                    & The process identifier (PID) is a unique of
+                                      an active process that performed the action
+                                      for an access.\\\hline
+   comm = httpd                    & The process command \\ \hline
+   path = /var/www/html/index.html & The path to the file which we tried to access \\ \hline
+   dev = dm-0                      & Describes the device where the target is
+                                      archived. \\ \hline
+   ino=1180274                     & Every file has a inode number.
+                                      Thus the operating system is able
+                                      to identify the specific inode of the target file. \\ \hline
+   scontext                        & s in scontext stands for source which means
+                                      that scontext describes the securit context
+                                      of the process. The scontext is set to
+                                      system\textunderscore u:system\textunderscore
+                                      r:httpd\textunderscore t:s0 \\ \hline
+   tcontext                        & t in tcontext stands for security context
+                                      of the target\\ \hline
+   tclass                          & Describes the class of the target.
+                                      In our case we have a file as target class
+                                      (index.html). \\ \hline
+   permissive                      & The permissive mode here is disabled. \\ \hline
+\end{tabular}
+
+Because of avc:denied for pid2980 in the message above we can say for sure that SELinux denied the access.
+We get a corresponding entry in the \textit{system's journal} by \texttt{journalctl}:
+\begin{lstlisting}[language=bash]
+~$ journalctl
+\end{lstlisting}
+The oldest entries will be up top, where we get the corresponding entry:
+\begin{lstlisting}[language=bash, caption={Output from \ file.}, captionpos=b, label=lst:journal,]
+...
+May 13 19:02:37 DSN-ACSLab-Master setroubleshoot[5005]: failed to retrieve rpm info for /var/www/html/index.html
+May 13 19:02:38 DSN-ACSLab-Master setroubleshoot[5005]: SELinux is preventing httpd from getattr access on the file /var/www/html/index.html. For complete SELinux messages. run sealert -l 5e0840eb-ba33-414d-a23a-8d75a8f4a31a
+May 13 19:02:38 DSN-ACSLab-Master python3[5005]: SELinux is preventing httpd from getattr access on the file /var/www/html/index.html.
+
+                                                 *****  Plugin restorecon (92.2 confidence) suggests   ************************
+
+                                                 If you want to fix the label.
+                                                 /var/www/html/index.html default label should be httpd_sys_content_t.
+                                                 Then you can run restorecon.
+                                                 Do
+                                                 # /sbin/restorecon -v /var/www/html/index.html
+
+                                                 *****  Plugin public_content (7.83 confidence) suggests   ********************
+
+                                                 If you want to treat index.html as public content
+                                                 Then you need to change the label on index.html to public_content_t or public_content_rw_t.
+                                                 Do
+                                                 # semanage fcontext -a -t public_content_t '/var/www/html/index.html'
+                                                 # restorecon -v '/var/www/html/index.html'
+
+                                                 *****  Plugin catchall (1.41 confidence) suggests   **************************
+
+                                                 If you believe that httpd should be allowed getattr access on the index.html file by default.
+                                                 Then you should report this as a bug.
+                                                 You can generate a local policy module to allow this access.
+                                                 Do
+                                                 allow this access for now by executing:
+                                                 # ausearch -c 'httpd' --raw | audit2allow -M my-httpd
+                                                 # semodule -X 300 -i my-httpd.pp
+...
+\end{lstlisting}
+
+In listing~\ref{lst:journal} we are informed \grqq{}for complete SELinux messages.
+run sealert -l 5e0840eb-ba33-414d-a23a-8d75a8f4a31a\grqq{} in order to get the complete
+message for that access decision. This shows us denials are assigned IDs. In our
+case we get the ID = \texttt{5e0840eb-ba33-414d-a23a-8d75a8f4a31a} for the access denial.\\
+\begin{lstlisting}[language=bash, caption={SELinux Context von index.html}, captionpos=b, label=lsfileattr]
+[student@DSN-ACSLab-Master html]$ sealert -l 5e0840eb-ba33-414d-a23a-8d75a8f4a31a
+SELinux is preventing httpd from getattr access on the file /var/www/html/index.html.
+
+*****  Plugin restorecon (92.2 confidence) suggests   ************************
+
+If you want to fix the label.
+/var/www/html/index.html default label should be httpd_sys_content_t.
+Then you can run restorecon.
+Do
+# /sbin/restorecon -v /var/www/html/index.html
+
+*****  Plugin public_content (7.83 confidence) suggests   ********************
+
+If you want to treat index.html as public content
+Then you need to change the label on index.html to public_content_t or public_content_rw_t.
+Do
+# semanage fcontext -a -t public_content_t '/var/www/html/index.html'
+# restorecon -v '/var/www/html/index.html'
+
+*****  Plugin catchall (1.41 confidence) suggests   **************************
+
+If you believe that httpd should be allowed getattr access on the index.html file by default.
+Then you should report this as a bug.
+You can generate a local policy module to allow this access.
+Do
+allow this access for now by executing:
+# ausearch -c 'httpd' --raw | audit2allow -M my-httpd
+# semodule -X 300 -i my-httpd.pp
+
+Additional Information:
+Source Context                system_u:system_r:httpd_t:s0
+Target Context                unconfined_u:object_r:samba_share_t:s0
+Target Objects                /var/www/html/index.html [ file ]
+Source                        httpd
+Source Path                   httpd
+Port                          <Unknown>
+Host                          DSN-ACSLab-Master
+Source RPM Packages
+Target RPM Packages
+Policy RPM                    selinux-policy-3.13.1-224.fc25.noarch
+Selinux Enabled               True
+Policy Type                   targeted
+Enforcing Mode                Enforcing
+Host Name                     DSN-ACSLab-Master
+Platform                      Linux DSN-ACSLab-Master 4.8.6-300.fc25.x86_64 #1
+                             SMP Tue Nov 1 12:36:38 UTC 2016 x86_64 x86_64
+Alert Count                   4
+First Seen                    2017-05-13 17:37:14 CEST
+Last Seen                     2017-05-13 19:02:33 CEST
+Local ID                      5e0840eb-ba33-414d-a23a-8d75a8f4a31a
+
+Raw Audit Messages
+type=AVC msg=audit(1494694953.911:493): avc:  denied  { getattr } for  pid=2981 comm="httpd" path="/var/www/html/index.html" dev="dm-0" ino=1180274 scontext=system_u:system_r:httpd_t:s0 tcontext=unconfined_u:object_r:samba_share_t:s0 tclass=file permissive=0
+
+
+Hash: httpd,httpd_t,samba_share_t,file,getattr
+
+[student@DSN-ACSLab-Master html]$
+\end{lstlisting}
+
+Compared to /var/log/audit/audit.log \texttt{sealert} gives us the same message  but associated with the denial and further detailed information.
+
+\section{SELinux as Reference Monitor}
+The Linux Security Module (LSM) defines a reference monitor interface for Linux so that  many implementations of reference monitors such as SELinux exist.
+
+ In the lecture three fundamental requirements were introduced that a Reference Monitor implementation has to fulfill (c.f. Lecture 1, Slide 30):
+ \begin{enumerate}
+\item Evaluable - small enough to be subject to analysis
+\item Always invoked - no alterative access method
+\item Tamper-proof - mechanism cannot be altered
+\end{enumerate}
+Furthermore, the extended Reference Monitor concepts have been introduced (c.f. Lecture 1, Slide 31), i.e. \textit{Authorization Database}, \textit{Monitor Interface} and \textit{Audit Trails}.
+To proof that LSM is an extended reference monitor interface and SELinux an implementation of it we have to map the concepts of an extended reference monitor to their Linux counterparts.
+A corresponding counterpart of  the Reference Monitor Interface in LSM is the concept of LSM hooks which are upcalls to modules when ever a user-level system call tries to acces an internal kernel object. The LSM labels are implemented as Authorization Databases and auditd and the \texttt{sealert} command can be mapped to Audit Trails.
+
+\section{Discussion and Conclusion}
+Because SELinux is one of the oldest and most popular Linux Security Module (LSM), to implement Reference Monitors for the Linux operating system it provides all the concepts of a Reference Monitor such as hooks, labels for a Authorization Database and auditd for Audit Trails.
+SELinux is a mandatory access control (MAC) security mechanism implemented in the kernel. It is a comprehensive Linux Security Module that goal is tamperproofing of system’s trusted computing base and therefore it implements Reference Monitors for the Linux operating system. It provides concepts i.e. \textit{Authorization Database} by labels, \textit{Monitor Interface} hooks and \textit{Audit Trails} by commands as \texttt{sealert}.
+
+
+\section*{Attachement A: Abbrevation}
+
+GNU GPL - Gneral Public License \\
+GUI - Graphical User Interface \\
+LSM - Linux Security Module \\
+MAC - Mandatory Access Control \\
+NSA - National Security Agency \\
+SELinux - Security-Enhanced Linux \label{selinux} \\
+
+\renewcommand{\bibname}{References}
+\begin{thebibliography}{9}
+
+\bibitem{wikisel}
+  Wikipedia-Web,\url{https://en.wikipedia.org/wiki/Security-Enhanced_Linux},
+  visited on 21/05/2017.
+\bibitem{FeDocSEL-SM}
+  Documentation of Fedora SELinux Modes,\url{https://docs.fedoraproject.org/en-US/Fedora/12/html/Security-Enhanced_Linux/sect-Security-Enhanced_Linux-Working_with_SELinux-SELinux_Modes.html},
+ visited on  21/05/2017.
+  \bibitem{FeDocSEL-EDS}
+  Documentation of Fedora SELinux Enabling and Disabling SELinux, \url{https://docs.fedoraproject.org/en-US/Fedora/11/html/Security-Enhanced_Linux/sect-Security-Enhanced_Linux-Working_with_SELinux-Enabling_and_Disabling_SELinux.html},
+  visited on 19/05/2017.
+  \bibitem{FeSELPo}
+  Documentation of Fedora SELinux Policies,\url{https://fedoraproject.org/wiki/De_DE/SELinux/Policies},
+  visted on 22/05/2017.
+  \bibitem{CeSEL}
+  Centos SELinux Documentation,\url{https://wiki.centos.org/HowTos/SELinux},
+  visited on 22/05/2017.
+  \bibitem{WiGeSEL}
+  Wikipedia Gentoo SELinux Documentation, chapter about SELinux labels, \url{https://wiki.gentoo.org/wiki/SELinux/Labels},
+  visted on 21/05/2017.
+  \bibitem{WiGeSEL-PDD}
+  Wikipedia Gentoo Documentation about SELinux permission Denial Details, \url{https://wiki.gentoo.org/wiki/SELinux/Tutorials/Where_to_find_SELinux_permission_denial_details},
+  visited on 21/05/2017.
+\end{thebibliography}
+
+\docend
+%%% end of document
