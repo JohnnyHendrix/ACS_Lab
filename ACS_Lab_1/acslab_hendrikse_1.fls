@@ -1,0 +1,6 @@
+PWD /Users/johnny/Desktop/ACS_Lab/ACS_Lab_1
+INPUT /usr/local/texlive/2016/texmf.cnf
+INPUT /usr/local/texlive/2016/texmf-dist/web2c/texmf.cnf
+INPUT /usr/local/texlive/2016/texmf-var/web2c/pdftex/pdflatex.fmt
+INPUT acslab_hendrikse_1.tex
+OUTPUT acslab_hendrikse_1.log

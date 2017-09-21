@@ -8,19 +8,19 @@
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
 \lstdefinestyle{mystyle}{
-   backgroundcolor=\color{backcolour},  
+   backgroundcolor=\color{backcolour},
    commentstyle=\color{codegreen},
    keywordstyle=\color{magenta},
    numberstyle=\tiny\color{codegray},
    stringstyle=\color{codepurple},
    basicstyle=\footnotesize,
-   breakatwhitespace=false,        
-   breaklines=true,                
-   captionpos=b,                   
-   keepspaces=true,                                
-   showspaces=false,               
+   breakatwhitespace=false,
+   breaklines=true,
+   captionpos=b,
+   keepspaces=true,
+   showspaces=false,
    showstringspaces=false,
-   showtabs=false,                 
+   showtabs=false,
    tabsize=2
 }
 \lstset{style=mystyle}
@@ -45,7 +45,7 @@
 \title{Praktikumsbericht 3}
 %
 % --> ... und den Namen des Autors:
-\author{Jean-Marc Hendrikse - 1751591}
+\author{Jean-Marc Hendrikse}
 % /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\
 % -----------------------------------------------------------------------------
 
@@ -61,9 +61,9 @@
 % \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
 % Einleitung
 % /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\
-\section*{Einleitung} % in die Klammern die Ueberschrift 
+\section*{Einleitung} % in die Klammern die Ueberschrift
 \label{Introduction} % und ein Label
-In dieser Übung wird anhand eines Datenmodels auf JSON-Basis für eine RBAC- und ReBAC-Instanz ein sogenannter Policy Decision Point umgesetzt, der anhand von Policies (deutsch Regeln) Entscheidungen treffen soll. Dadurch kann ein Zugriffsystem erstellt werden, das Ressourcen vor unerlaubten Zugriffen schützt und nur Benutzern die Erlaubnis erteilt, die eine entsprechende Rolle innehaben. 
+In dieser Übung wird anhand eines Datenmodels auf JSON-Basis für eine RBAC- und ReBAC-Instanz ein sogenannter Policy Decision Point umgesetzt, der anhand von Policies (deutsch Regeln) Entscheidungen treffen soll. Dadurch kann ein Zugriffsystem erstellt werden, das Ressourcen vor unerlaubten Zugriffen schützt und nur Benutzern die Erlaubnis erteilt, die eine entsprechende Rolle innehaben.
 
 
 % ---------------------------------------------------------------------------
@@ -85,8 +85,8 @@ Nachfolgend wird beschrieben wie man eine RBAC-Insatz umsetzen kann. Als grundle
 \item "'permissionassignment"':  Hier sind die Rollen definiert, die auf eine bestimmte Ressource mit dem Feld \texttt{name}, zugreifen können.
 \end{itemize}
 
-Die Zugriffsentscheidungen werden durch Funktionen eines Python-Skripts auf Basis dieser  Datenstruktur getroffen. Über die Kommandozeile werden die 
-Eingabewerte \texttt{user} und \texttt{resource} eingelesen, die zur Zugriffsentscheidung benötigt werden: python rbac.py Alice Angola. 
+Die Zugriffsentscheidungen werden durch Funktionen eines Python-Skripts auf Basis dieser  Datenstruktur getroffen. Über die Kommandozeile werden die
+Eingabewerte \texttt{user} und \texttt{resource} eingelesen, die zur Zugriffsentscheidung benötigt werden: python rbac.py Alice Angola.
 
 \begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=Python, caption={Auszug aus dem Python-Skript: Initialisierung von user und resource}, captionpos=b, label=rbac_cmd]
 #!/usr/bin/python
@@ -96,7 +96,7 @@ import sys
     resource = sys.argv[2] # Name of the resource a person tries to access
 \end{lstlisting}
 
-In Listing \ref{rbac_cmd} wird der Name und die Ressource mit der entsprechenden Benutzereingabe initialisiert. 
+In Listing \ref{rbac_cmd} wird der Name und die Ressource mit der entsprechenden Benutzereingabe initialisiert.
 Die JSON-Datei wandeln wir, wie in Listing \ref{jsonload}, mittels \texttt{json.loads()} in ein JSON-Objekt um, sodass wir auf den Daten in Python operieren können.
 
 \begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=Python, caption={Über json.load() wird der Inhalt der JSON-Datei eingelesen und in ein JSON-Objekt umgewandelt}, captionpos=b, label=jsonload]
@@ -143,7 +143,7 @@ Zum Abschluss wird abhängig von den obigen entscheidungen entweder \texttt{True
 \begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=Python, caption={Ausgabe True, wenn Zugriff gewährt wird. Andernfalls False.}, captionpos=b]
 		print hasPerm
     else:
-        print False 
+        print False
 \end{lstlisting}
 
 
@@ -155,7 +155,7 @@ Zum Abschluss wird abhängig von den obigen entscheidungen entweder \texttt{True
 \label{rebac}
 Benutzer in Social Networks sind über Beziehungen miteinander Verknüpft. Beispielsweise können durch eine Einstellung bei Facebook nur die eigenen Freunde sehen, was ein Benutzer gepostet oder hochgeladen hat. Der Besitzer einer Ressource kann somit anhand von Beziehungen zu demjenigen bestimmen, der auf die Ressource zugreifen möchte. So einen Ansatz nennt man Relation-Based Access Control (kurz ReBAC). Im Nachfolgenden möchten wir eine solche Insatz wieder anhand eines gegebenen Datenmodels erstellen.
 
-\subsection{ReBAC Implementierung} 
+\subsection{ReBAC Implementierung}
 \label{rebac_impl}
 Ähnlich wie in Kapitel \ref{umsetzung} bietet eine JSON-Datei die Grundlage für unsere Zugriffsentscheidungen. Das JSON-File beinhaltet die nachfolgenden vier Elemente:
 \begin{itemize}
@@ -189,7 +189,7 @@ else:
     print "-> False"
 \end{lstlisting}
 
-Wie in Listing \ref{rebac_init} zu erkennen ist, wird die Funktion \texttt{all\_conj()} ausgeführt, wenn der Benutzer das Schlüsselwort \texttt{ALL} eingibt. In dieser Funktion wird verglichen ob die Distanz des Benutzers zu dem "'controller"' über den \texttt{usergraph} in der TRP-Regel liegt und ob zusätzlich die Distanz des Benutzers zu allen "'target"'-Benutzern in den jeweiligen TUP-Regeln liegt. Ist dies der Fall wird der boolsche Wert \texttt{True} ausgegeben. Auch hier wird wieder auf den Breadth-First-Search-Algorithmus zurückgegriffen. Dieses Mal wird allerdings die Distanz zwischen zwei Benutzern in einem Benutzergraphen berechnet. 
+Wie in Listing \ref{rebac_init} zu erkennen ist, wird die Funktion \texttt{all\_conj()} ausgeführt, wenn der Benutzer das Schlüsselwort \texttt{ALL} eingibt. In dieser Funktion wird verglichen ob die Distanz des Benutzers zu dem "'controller"' über den \texttt{usergraph} in der TRP-Regel liegt und ob zusätzlich die Distanz des Benutzers zu allen "'target"'-Benutzern in den jeweiligen TUP-Regeln liegt. Ist dies der Fall wird der boolsche Wert \texttt{True} ausgegeben. Auch hier wird wieder auf den Breadth-First-Search-Algorithmus zurückgegriffen. Dieses Mal wird allerdings die Distanz zwischen zwei Benutzern in einem Benutzergraphen berechnet.
 
 \begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=Python, caption={Umsetzung der ALL-Variante, welche eine Konjunktion aller Regeln umsetzt.}, captionpos=b, label=rebac_init]
 def all_conj(userName, resource_list):
@@ -248,7 +248,7 @@ def bfs(graph, start, end):
             new_path.append(adjacent)
             queue.append(new_path)
 \end{lstlisting}
-Neben der Variante, in der alle Policies mit der Distanz verglichen werden, gibt es noch die Umsetzung mit dem Schlüsselwort \texttt{ANY}, wodurch entweder nur die Distanz des Benutzers zum Kontroller mit der TRP-Regel oder die Distanz des Benutzers zu einem der target-Benutzern mit dessen TUP-Regel übereinstimmen muss: 
+Neben der Variante, in der alle Policies mit der Distanz verglichen werden, gibt es noch die Umsetzung mit dem Schlüsselwort \texttt{ANY}, wodurch entweder nur die Distanz des Benutzers zum Kontroller mit der TRP-Regel oder die Distanz des Benutzers zu einem der target-Benutzern mit dessen TUP-Regel übereinstimmen muss:
 \begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=Python, caption={Umsetzung der ANY-Variante umsetzt.}, captionpos=b]
 def any_conj(userName, resource_list):
     res = {}
@@ -284,23 +284,23 @@ Zur Erweiterung der ReBAC-Instanz aus vorherigem Abschnitt bietet es sich an wei
  "usergraph": {
     "Willy": {
     		"friends": [
-      			"Melina", 
-      			"Juliana", 
-      			"Madella", 
-      			"Jerrilee", 
-      			"Binni", 
-      			"Amalita", 
+      			"Melina",
+      			"Juliana",
+      			"Madella",
+      			"Jerrilee",
+      			"Binni",
+      			"Amalita",
       			"Alicea"
       		],
       		"coworker": [
-      			"Peter", 
-      			"Stephanie", 
+      			"Peter",
+      			"Stephanie",
       			"Melina"
       		],
       		"family": [
 				"Susanne",
 				"Diana",
-				"Thomas"      		
+				"Thomas"
       		]
     }, ...}
 \end{lstlisting}
@@ -313,15 +313,15 @@ Ein Ansatz bei der Umwandlung einer RBAC-Instanz in eine ReBAC-Instanz wäre die
 { ...
 "roleassignment": {
 "Janeva": [
-      "information", 
-      "product", 
+      "information",
+      "product",
       "creative"
-    ], 
+    ],
     "Marcia": [
-      "product",  
-      "data",  
+      "product",
+      "data",
  	  "communications"
-    ], 
+    ],
     "Anni": [
       "communications",
       "creative"
@@ -337,43 +337,43 @@ Eine Transformierung von Listing \ref{rbac_roleass} in ein entsprechendes ReBAC-
   "usergraph": {
     "information": [
      "Janeva"
-    ], 
+    ],
     "product": [
-      "Janeva", 
+      "Janeva",
       "Marcia"
-    ], 
+    ],
      "creative": [
-      "Janeva", 
+      "Janeva",
       "Anni"
-    ], 
+    ],
       "communications": [
-      "Anni", 
+      "Anni",
       "Marcia"
-    ], 
+    ],
       "data": [
       "Marcia"
     ]}...}
-\end{lstlisting}  
+\end{lstlisting}
 
 
-Auch das \texttt{permissionassignment} Listing \ref{perass} kann im äquivalenten \texttt{resources}-Feld aus dem ReBAC-Datensatz umgewandelt werden Listing \ref{res_rebac}, indem die target user Rollen werden. 
+Auch das \texttt{permissionassignment} Listing \ref{perass} kann im äquivalenten \texttt{resources}-Feld aus dem ReBAC-Datensatz umgewandelt werden Listing \ref{res_rebac}, indem die target user Rollen werden.
 \begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=bash, caption={Permission assignment in RBAC}, captionpos=b, label=perass]
 {
   "permissionassignment": [
     {
       "pa": [
-        "creative", 
-        "product" 
-      ], 
+        "creative",
+        "product"
+      ],
       "name": "Afghanistan"
-    }, 
+    },
 \end{lstlisting}
 \begin{lstlisting}[numbers=left, numberstyle=\small, numbersep=8pt, xleftmargin=1.5em, framexleftmargin=1.5em,language=bash, caption={Äquivalent zum RBACs permissionassignment das modifizierte "resources"-Feld}, captionpos=b, label=res_rebac]
 "resources": [
     {
-      "name": "Afghanistan", 
+      "name": "Afghanistan",
       "target": [
-        "product", 
+        "product",
         "creative"
       ]
     }, ...
@@ -384,19 +384,19 @@ Abschließend müssen natürlich noch Policies so angepasst werden, dass sie auc
  policies": {
     "product": {
       "tup": "h=1"
-    }, 
-    
+    },
+
     "creative": {
       "tup": "h=1"
-    }, 
+    },
     "communications": {
       "tup": "h=1"
-    }, 
+    },
     "information": {
       "tup": "h=1"
-    }, 
+    },
     \end{lstlisting}
-    
+
 \section*{Anhang}
 \label{anhang}
 Nachfolgend die kompletten Programme.
